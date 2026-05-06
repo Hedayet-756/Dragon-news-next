@@ -1,26 +1,48 @@
 import dns from "node:dns";
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-
-// src/proxy.js
 import { NextResponse } from "next/server";
 
-export async function proxy(request) {
-    // Better Auth সেশন টোকেন কুকি থেকে রিড করা
-    const sessionToken = request.cookies.get("better-auth.session_token");
+export async function middleware(request) {
+    // Better Auth সেশন টোকেনটি পাওয়ার চেষ্টা করুন
+    const allCookies = request.cookies;
+    const sessionToken = allCookies.get("better-auth.session_token")?.value;
 
-    // যদি কুকি না থাকে, তবে লগইন পেজে পাঠিয়ে দিন
+    // লগ করার জন্য (ঐচ্ছিক): এটি নেটলিফাই লগে দেখা যাবে সেশন পাচ্ছে কি না
+    // console.log("Session Token:", sessionToken);
+
     if (!sessionToken) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        // যদি সেশন না থাকে, তবে লগইন পেজে পাঠান
+        return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // কুকি থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
     return NextResponse.next();
-};
+}
 
 export const config = {
-    matcher: ['/career', '/news/:path*'],
+    matcher: ["/career", "/news/:path*"],
 };
+
+
+// // src/proxy.js
+// import { NextResponse } from "next/server";
+
+// export async function proxy(request) {
+//     // Better Auth সেশন টোকেন কুকি থেকে রিড করা
+//     const sessionToken = request.cookies.get("better-auth.session_token");
+
+//     // যদি কুকি না থাকে, তবে লগইন পেজে পাঠিয়ে দিন
+//     if (!sessionToken) {
+//         return NextResponse.redirect(new URL('/login', request.url));
+//     }
+
+//     // কুকি থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
+//     return NextResponse.next();
+// };
+
+// export const config = {
+//     matcher: ['/career', '/news/:path*'],
+// };
 
 
 // import { NextResponse } from "next/server";
