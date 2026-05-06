@@ -1,28 +1,63 @@
 import dns from "node:dns";
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
-// src/proxy.js
+
 import { NextResponse } from "next/server";
 
-// 'middleware' এর বদলে নাম পরিবর্তন করে 'proxy' করুন
 export async function proxy(request) {
-    // Better Auth সেশন টোকেন চেক করা
+    // Better Auth সেশন টোকেনটি পাওয়ার চেষ্টা করুন
     const sessionToken = request.cookies.get("better-auth.session_token")?.value;
 
-    // যদি সেশন টোকেন না থাকে, তবে লগইন পেজে রিডাইরেক্ট করুন
-    if (!sessionToken) {
-        const url = new URL("/login", request.url);
-        return NextResponse.redirect(url);
+    // লগ করার জন্য (এটি নেটলিফাই লগে দেখা যাবে)
+    console.log("Current Path:", request.nextUrl.pathname);
+    console.log("Session Token Found:", !!sessionToken);
+
+    // ১. যদি ইউজার লগইন পেজে থাকে এবং সেশন টোকেন থাকে, তবে তাকে ড্যাশবোর্ড বা হোম পেজে পাঠিয়ে দিন
+    if (request.nextUrl.pathname === "/login" && sessionToken) {
+        return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // সেশন থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
+    // ২. যদি ইউজার ক্যারিয়ার বা প্রটেক্টেড পেজে যাওয়ার চেষ্টা করে এবং সেশন না থাকে
+    if (!sessionToken) {
+        // নিশ্চিত করুন যে আমরা অলরেডি লগইন পেজে নেই (নাহলে ইনফিনিট লুপ হবে)
+        if (request.nextUrl.pathname !== "/login") {
+            const loginUrl = new URL("/login", request.url);
+            return NextResponse.redirect(loginUrl);
+        }
+    }
+
+    // সবকিছু ঠিক থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
     return NextResponse.next();
 }
 
-// এই কনফিগটি নিশ্চিত করবে কোন পেজগুলো প্রটেক্ট করা হবে
 export const config = {
-    matcher: ["/career", "/news/:path*"],
+    matcher: ["/career", "/news/:path*", "/login"], // লগইন পেজকেও ম্যাচারের ভেতরে রাখুন
 };
+
+
+
+// // src/proxy.js
+// import { NextResponse } from "next/server";
+
+// // 'middleware' এর বদলে নাম পরিবর্তন করে 'proxy' করুন
+// export async function proxy(request) {
+//     // Better Auth সেশন টোকেন চেক করা
+//     const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+
+//     // যদি সেশন টোকেন না থাকে, তবে লগইন পেজে রিডাইরেক্ট করুন
+//     if (!sessionToken) {
+//         const url = new URL("/login", request.url);
+//         return NextResponse.redirect(url);
+//     }
+
+//     // সেশন থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
+//     return NextResponse.next();
+// }
+
+// // এই কনফিগটি নিশ্চিত করবে কোন পেজগুলো প্রটেক্ট করা হবে
+// export const config = {
+//     matcher: ["/career", "/news/:path*"],
+// };
 
 // // src/proxy.js
 // import { NextResponse } from "next/server";
