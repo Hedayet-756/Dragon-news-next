@@ -1,28 +1,28 @@
 import dns from "node:dns";
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
+// src/proxy.js
 import { NextResponse } from "next/server";
 
-export async function middleware(request) {
-    // Better Auth সেশন টোকেনটি পাওয়ার চেষ্টা করুন
-    const allCookies = request.cookies;
-    const sessionToken = allCookies.get("better-auth.session_token")?.value;
+// 'middleware' এর বদলে নাম পরিবর্তন করে 'proxy' করুন
+export async function proxy(request) {
+    // Better Auth সেশন টোকেন চেক করা
+    const sessionToken = request.cookies.get("better-auth.session_token")?.value;
 
-    // লগ করার জন্য (ঐচ্ছিক): এটি নেটলিফাই লগে দেখা যাবে সেশন পাচ্ছে কি না
-    // console.log("Session Token:", sessionToken);
-
+    // যদি সেশন টোকেন না থাকে, তবে লগইন পেজে রিডাইরেক্ট করুন
     if (!sessionToken) {
-        // যদি সেশন না থাকে, তবে লগইন পেজে পাঠান
-        return NextResponse.redirect(new URL("/login", request.url));
+        const url = new URL("/login", request.url);
+        return NextResponse.redirect(url);
     }
 
+    // সেশন থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
     return NextResponse.next();
 }
 
+// এই কনফিগটি নিশ্চিত করবে কোন পেজগুলো প্রটেক্ট করা হবে
 export const config = {
     matcher: ["/career", "/news/:path*"],
 };
-
 
 // // src/proxy.js
 // import { NextResponse } from "next/server";
