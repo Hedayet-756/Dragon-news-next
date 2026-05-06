@@ -1,7 +1,7 @@
 import LeftSidebar from "@/components/homepage/news/LeftSidebar";
 import NewsCard from "@/components/homepage/news/NewsCard";
 import RightSidebar from "@/components/homepage/news/RightSidebar";
-import { getCategories, getNewsByCategoryId } from "@/lib/data";
+import { getCategories, getNewsByCategoryId } from "../../../../../lib/data";
 import React from "react";
 
 const NewsCategoryPage = async ({ params }) => {
