@@ -2,37 +2,37 @@ import dns from "node:dns";
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 
-import { NextResponse } from "next/server";
+// import { NextResponse } from "next/server";
 
-export async function proxy(request) {
-    // Better Auth সেশন টোকেনটি পাওয়ার চেষ্টা করুন
-    const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+// export async function proxy(request) {
+//     // Better Auth সেশন টোকেনটি পাওয়ার চেষ্টা করুন
+//     const sessionToken = request.cookies.get("better-auth.session_token")?.value;
 
-    // লগ করার জন্য (এটি নেটলিফাই লগে দেখা যাবে)
-    console.log("Current Path:", request.nextUrl.pathname);
-    console.log("Session Token Found:", !!sessionToken);
+//     // লগ করার জন্য (এটি নেটলিফাই লগে দেখা যাবে)
+//     console.log("Current Path:", request.nextUrl.pathname);
+//     console.log("Session Token Found:", !!sessionToken);
 
-    // ১. যদি ইউজার লগইন পেজে থাকে এবং সেশন টোকেন থাকে, তবে তাকে ড্যাশবোর্ড বা হোম পেজে পাঠিয়ে দিন
-    if (request.nextUrl.pathname === "/login" && sessionToken) {
-        return NextResponse.redirect(new URL("/", request.url));
-    }
+//     // ১. যদি ইউজার লগইন পেজে থাকে এবং সেশন টোকেন থাকে, তবে তাকে ড্যাশবোর্ড বা হোম পেজে পাঠিয়ে দিন
+//     if (request.nextUrl.pathname === "/login" && sessionToken) {
+//         return NextResponse.redirect(new URL("/", request.url));
+//     }
 
-    // ২. যদি ইউজার ক্যারিয়ার বা প্রটেক্টেড পেজে যাওয়ার চেষ্টা করে এবং সেশন না থাকে
-    if (!sessionToken) {
-        // নিশ্চিত করুন যে আমরা অলরেডি লগইন পেজে নেই (নাহলে ইনফিনিট লুপ হবে)
-        if (request.nextUrl.pathname !== "/login") {
-            const loginUrl = new URL("/login", request.url);
-            return NextResponse.redirect(loginUrl);
-        }
-    }
+//     // ২. যদি ইউজার ক্যারিয়ার বা প্রটেক্টেড পেজে যাওয়ার চেষ্টা করে এবং সেশন না থাকে
+//     if (!sessionToken) {
+//         // নিশ্চিত করুন যে আমরা অলরেডি লগইন পেজে নেই (নাহলে ইনফিনিট লুপ হবে)
+//         if (request.nextUrl.pathname !== "/login") {
+//             const loginUrl = new URL("/login", request.url);
+//             return NextResponse.redirect(loginUrl);
+//         }
+//     }
 
-    // সবকিছু ঠিক থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
-    return NextResponse.next();
-}
+//     // সবকিছু ঠিক থাকলে রিকোয়েস্টটি এগিয়ে যেতে দিন
+//     return NextResponse.next();
+// }
 
-export const config = {
-    matcher: ["/career", "/news/:path*", "/login"], // লগইন পেজকেও ম্যাচারের ভেতরে রাখুন
-};
+// export const config = {
+//     matcher: ["/career", "/news/:path*", "/login"], // লগইন পেজকেও ম্যাচারের ভেতরে রাখুন
+// };
 
 
 
@@ -80,26 +80,26 @@ export const config = {
 // };
 
 
-// import { NextResponse } from "next/server";
-// import { auth } from "../lib/auth";
-// import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+import { auth } from "../lib/auth";
+import { headers } from "next/headers";
 
-// export async function proxy(request) {
-//     // console.log('Proxy middleware hit for:', request);
+export async function proxy(request) {
+    // console.log('Proxy middleware hit for:', request);
 
-//     const session = await auth.api.getSession({
-//         headers: await headers()
-//     })
-//     console.log('Session in proxy:', session);
+    const session = await auth.api.getSession({
+        headers: await headers()
+    })
+    console.log('Session in proxy:', session);
 
-//     // const isLoggedIn = false; // Replace with actual authentication logic
+    // const isLoggedIn = false; // Replace with actual authentication logic
 
-//     if (session) {
-//         return NextResponse.next();
-//     }
-//     return NextResponse.redirect(new URL('/login', request.url))
-// };
+    if (session) {
+        return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL('/login', request.url))
+};
 
-// export const config = {
-//     matcher: ['/career', '/news/:path*'],
-// };
+export const config = {
+    matcher: ['/career', '/news/:path*'],
+};
